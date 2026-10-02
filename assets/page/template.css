@@ -1,0 +1,1613 @@
+/*
+ * X-Template
+ * Author: Hengtao Wu (EternalWavee)
+ * License: MIT
+ *
+ * Reusable, zero-dependency styles for a bilingual academic project page.
+ * Change the accent colors in :root and replace the page content and images
+ * to adapt the template for another project.
+ */
+
+:root {
+  color-scheme: light;
+
+  /* --- palette: neutral ------------------------------------------------ */
+  --bg: #ffffff;
+  --surface: #ffffff;
+  --ink: #1f2328;
+  --ink-soft: #4a5058;
+  --muted: #6b7178;
+  --faint: #a7b1c5;
+  --rule: #e6e8eb;
+  --rule-strong: #d0d4d9;
+  --line: rgba(106, 130, 176, 0.18);
+  --line-strong: rgba(106, 130, 176, 0.36);
+  --dark: #10141f;
+  --dark-ink: #eef2fa;
+  --dark-muted: #9aa6bd;
+
+  /* --- palette: accent (the only two values you need to re-skin) -------- */
+  --accent: #5d91dc;
+  --accent-2: #8878ea;
+  --accent-soft: rgba(116, 169, 239, 0.13);
+  --accent-soft-2: rgba(170, 161, 233, 0.15);
+  --grad: linear-gradient(96deg, #74a9ef 0%, #5d91dc 50%, #8878ea 100%);
+  --grad-wide: linear-gradient(
+    90deg,
+    #74a9ef 0%,
+    #5d91dc 25%,
+    #8878ea 50%,
+    #5d91dc 75%,
+    #74a9ef 100%
+  );
+
+  /* --- typography ------------------------------------------------------ */
+  /* serif = titles, sans = interface, mono = code and timecodes */
+  --font-serif: "Charter", "Iowan Old Style", "Palatino Linotype", Palatino,
+    "Source Serif 4", "Source Serif Pro", Georgia, "Times New Roman",
+    "Songti SC", "Source Han Serif SC", serif;
+  --font-sans: "Geist", "Inter", "SF Pro Text", -apple-system, BlinkMacSystemFont,
+    "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei",
+    "Noto Sans SC", sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, "JetBrains Mono",
+    Menlo, Consolas, monospace;
+
+  /* --- rhythm ----------------------------------------------------------- */
+  --page: 1140px;
+  --prose: 800px;
+  --gutter: clamp(20px, 5vw, 40px);
+  --section-gap: clamp(56px, 7vw, 92px);
+
+  /* --- motion ----------------------------------------------------------- */
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --dur: 380ms;
+  --dur-slow: 620ms;
+
+  /* --- shape ------------------------------------------------------------ */
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 14px;
+  --r-xl: 22px;
+  --shadow: 0 1px 2px rgba(70, 105, 175, 0.05),
+    0 14px 40px -22px rgba(70, 105, 175, 0.22);
+  --shadow-pill: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  overflow-x: hidden;
+  color: var(--ink);
+  background: var(--bg);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.62;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4,
+p,
+figure,
+pre {
+  margin: 0;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+:focus-visible {
+  outline: 3px solid rgba(93, 145, 220, 0.34);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* No fixed reading-progress bar: the page scrolls as a plain document. */
+
+/* --- layout ------------------------------------------------------------- */
+
+.wrap {
+  width: 100%;
+  max-width: var(--page);
+  margin: 0 auto;
+  padding: 0 var(--gutter);
+}
+
+/* ==========================================================================
+   Language toggle
+   ========================================================================== */
+
+/* fixed top bar — the brand mark and the language pill are flex items in one
+   row: align-items:center keeps their centers on the same line at any size,
+   space-between mirrors them to the edges, pointer-events:none keeps the empty
+   middle click-through */
+.top-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 70;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  pointer-events: none;
+}
+.top-bar > * {
+  pointer-events: auto;
+}
+
+/* Wide screens: position:fixed (above) keeps the bar parked at the top of the
+   viewport, always visible while scrolling. It floats in the empty side
+   gutters over the prose column — same look as a desktop browser.
+
+   Narrow screens (below): switch to absolute so the bar still sits transparent
+   over the hero photograph at the very top of the page, but scrolls away with
+   the document instead of floating over the body text when you scroll down. */
+@media (max-width: 1320px) {
+  .top-bar {
+    position: absolute;
+    top: 0;
+  }
+}
+
+.lang-toggle {
+  position: relative;
+  /* two equal tracks so EN and 中文 always get the same slot width — otherwise
+     the sliding thumb would resize itself on every switch */
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  padding: clamp(2px, 0.5vw, 3px);
+  border-radius: 999px;
+  border: 1px solid var(--rule);
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: var(--shadow-pill);
+}
+
+/* the dark pill slides between the two labels instead of cross-fading */
+.lang-thumb {
+  position: absolute;
+  top: clamp(2px, 0.5vw, 3px);
+  bottom: clamp(2px, 0.5vw, 3px);
+  left: clamp(2px, 0.5vw, 3px);
+  width: 0;
+  border-radius: 999px;
+  background: #1f2328;
+  pointer-events: none;
+}
+
+/* Transitions are switched on only after the first placement (.is-ready), so a
+   page load or refresh does not animate the thumb sliding into EN. Width is
+   not transitioned at all — both tracks are equal, so it never changes. */
+.lang-toggle.is-ready .lang-thumb {
+  transition: transform 280ms var(--ease);
+}
+
+.lang-toggle button {
+  position: relative;
+  z-index: 1;
+  appearance: none;
+  -webkit-appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-family: var(--font-sans);
+  font-size: clamp(11px, 1.3vw, 12.5px);
+  font-weight: 600;
+  padding: clamp(4px, 0.6vw, 6px) clamp(9px, 1.2vw, 12px);
+  border-radius: 999px;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color 180ms ease;
+}
+
+.lang-toggle button:hover {
+  color: var(--ink);
+}
+
+.lang-toggle button.active,
+.lang-toggle button.active:hover {
+  color: #fff;
+}
+
+/* small, restrained wordmark pinned top-left — a quiet brand mark that never
+   competes with the hero title */
+.brand {
+  display: block;
+  line-height: 0;
+}
+.brand img {
+  /* auto-shrink with the viewport so the wordmark stays in proportion on
+     phones/tablets — same transparent look as the desktop bar */
+  height: clamp(40px, 5.4vw, 75px);
+  width: auto;
+  opacity: 1;
+}
+
+/* ==========================================================================
+   Hero — a full-bleed photograph behind the title block. Mirror image of
+   the closing block below: photo at the top, fading into the white page.
+   Replace `../images/hero-background.jpg` to change the mood.
+   ========================================================================== */
+
+.hero-bg {
+  position: relative;
+  overflow: hidden;
+  /* no min-height on desktop: the block is exactly as tall as the title, so 01
+     follows at the standard section gap. Narrow screens get a taller min-height
+     in the @media (max-width: 860px) block below, so the cover photo reads as a
+     full-bleed band instead of a short strip. */
+  padding: clamp(52px, 9vw, 120px) 0 clamp(44px, 7vw, 88px);
+  background-color: #eef3fa;
+}
+
+/* The photograph is its own layer that fills the block with `cover`: it always
+   spans the full width AND the full height, cropped to fit, so there is never a
+   thin band or a gap of the page background below it — the same full-bleed look
+   as the closing .cta block on every viewport. The block height is pinned by the
+   hero height-lock in page.js, so switching to 中文 (which would otherwise
+   shorten the block) does not re-crop the photo. */
+.hero-bg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("../images/hero-background.jpg");
+  background-size: cover;
+  background-position: center top;
+  background-repeat: no-repeat;
+}
+
+/* The veil: a whisper of white at the top for the ink title, then the fade is
+   compressed into the last ~30% so the photograph keeps its body. An earlier
+   version reached 0.82 white at 78%, which erased the lower half of the photo. */
+.hero-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.24) 0%,
+    rgba(255, 255, 255, 0.28) 46%,
+    rgba(255, 255, 255, 0.46) 70%,
+    rgba(255, 255, 255, 0.78) 88%,
+    #ffffff 100%
+  );
+}
+
+/* ==========================================================================
+   Title block — logo, ruled serif title, tagline, authors, pills
+   ========================================================================== */
+
+.title-block {
+  position: relative;
+  z-index: 1; /* above the hero photo (::before) and veil (::after) */
+  width: 100%;
+  text-align: center;
+  /* keep the side gutters (only the vertical padding is intentionally zero —
+     see #abstract.section below) */
+  padding: 0 var(--gutter);
+}
+
+.hero-title {
+  margin: 0 auto;
+  max-width: 1000px;
+  font-family: var(--font-serif);
+  font-weight: 600;
+  color: var(--ink);
+}
+
+/* the ruled lines above/below the title were removed: they only work on a
+   plain white page, not over a photograph */
+
+.title-text {
+  display: block;
+  font-size: clamp(23px, 2.9vw, 36px);
+  line-height: 1.24;
+  letter-spacing: -0.015em;
+  padding: 0 8px;
+}
+
+/* identity motif #2 — one slow gradient phrase, the project name */
+.grad {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  background: var(--grad-wide);
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  animation: grad-drift 11s linear infinite;
+}
+
+@keyframes grad-drift {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 220% 50%;
+  }
+}
+
+.hero-tagline {
+  display: block;
+  margin: 13px auto 0;
+  max-width: 900px;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 500;
+  font-size: clamp(17px, 1.6vw, 21px);
+  line-height: 1.42;
+  color: var(--ink-soft);
+  padding: 0 8px;
+}
+
+.authors {
+  margin-top: 18px;
+  font-family: var(--font-serif);
+  font-size: 19px;
+  color: var(--ink-soft);
+  line-height: 1.5;
+}
+
+.authors .name {
+  color: var(--ink);
+}
+
+.authors sup {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  color: var(--muted);
+  margin-left: 1px;
+}
+
+.affiliations {
+  margin-top: -6px;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 16px;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.affiliations .aff-num {
+  font-style: normal;
+  font-size: 11px;
+  vertical-align: super;
+  margin-right: 2px;
+}
+
+/* --- link pills (solid, weighted) ---------------------------------------- */
+
+.link-row {
+  margin-top: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  font-family: var(--font-sans);
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: 999px;
+  font-size: 14.5px;
+  font-weight: 600;
+  line-height: 1;
+  color: #fff;
+  box-shadow: var(--shadow-pill);
+  transition: transform 150ms ease, filter 150ms ease, box-shadow 150ms ease;
+}
+
+.pill:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.06);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.pill svg.mark {
+  width: 17px;
+  height: 17px;
+  flex: none;
+  display: block;
+}
+
+/* --------------------------------------------------------------------------
+   Brand pills — every pill uses the platform's own brand colour and its real
+   logo mark, so the row is scannable at a glance. Colours are the official
+   ones: arXiv #B31B1B, GitHub #181717, Hugging Face #FFD21E, ModelScope
+   #624AFF (from the ModelScope official logo repo). Do not "tidy" these into
+   a matching palette — the mismatch is what makes them recognisable.
+   -------------------------------------------------------------------------- */
+.pill.arxiv {
+  background: #b31b1b;
+}
+
+.pill.github {
+  background: #181717;
+}
+
+.pill.modelscope {
+  background: #624aff;
+}
+
+/* Hugging Face — official brand yellow #FFD21E with white text, matching the
+   white-on-brand treatment of the arXiv / GitHub / ModelScope pills.
+   Known trade-off: white on this yellow measures 1.45:1, well under the 4.5:1
+   AA floor for body text. Kept deliberately. If it ever needs to pass, either
+   flip the text to ink (color:#1f2328 -> 10.9:1) or darken the ground:
+     #CE9700 2.61:1 · #C08A00 3.05:1 · #A8800A 3.65:1 · #8C6A00 5.03:1 */
+.pill.hf {
+  background: #ffd21e;
+  color: #fff;
+  font-weight: 650;
+}
+
+/* Template slot — the one CTA pill, kept for reuse even when the current page
+   does not use it (the link row is arXiv / Code / ModelScope / Hugging Face,
+   and the demo already has its own section further down). */
+.pill.accent {
+  background: #f97316;
+}
+
+/* ==========================================================================
+   Sections — rule-text-rule headings, centered prose
+   ========================================================================== */
+
+.section {
+  /* horizontal gutter must be restated here: this rule comes after .wrap and
+     would otherwise zero .wrap's side padding, leaving paragraphs edge to edge
+     on narrow screens (invisible on desktop, where the prose max-widths
+     centre themselves inside the wide page) */
+  padding: var(--section-gap) var(--gutter) 0;
+}
+
+/* the hero carries no bottom padding, so the gap between the title block and
+   01 is exactly the standard section gap — same as 01 → 02 */
+#abstract.section {
+  padding-top: var(--section-gap);
+}
+
+.section-head {
+  margin-bottom: 26px;
+  text-align: center;
+}
+
+/* identity motif #3 — rule, text, rule */
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  width: 100%;
+  margin: 0 0 14px;
+  font-family: var(--font-serif);
+  font-weight: 600;
+  font-size: clamp(24px, 2.8vw, 33px);
+  letter-spacing: -0.015em;
+  color: var(--ink);
+}
+
+.section-title::before,
+.section-title::after {
+  content: "";
+  flex: 1 1 auto;
+  height: 1px;
+  background: var(--rule-strong);
+}
+
+.section-title > .title-text {
+  flex: 0 0 auto;
+}
+
+/* chapter pill, sits above the heading */
+.section-index {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 14px;
+  padding: 4px 13px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 550;
+  letter-spacing: 0.16em;
+  font-variant-numeric: tabular-nums;
+}
+
+.section-led {
+  max-width: var(--prose);
+  margin: 0 auto;
+  text-align: center;
+  color: var(--ink-soft);
+  font-size: 16.5px;
+}
+
+.section-led strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.section-body {
+  max-width: 780px;
+  margin: 0 auto;
+}
+
+.section-body p + p {
+  margin-top: 16px;
+}
+
+/* the column is centered on the page; the text itself reads left to right */
+.abstract {
+  text-align: justify;
+  text-justify: inter-word;
+  font-size: 16.5px;
+  line-height: 1.78;
+  color: var(--ink-soft);
+}
+
+.abstract strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+/* ==========================================================================
+   Cards
+   ========================================================================== */
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.card {
+  padding: 24px 26px 26px;
+  border-radius: var(--r-lg);
+  border: 1px solid var(--rule);
+  background: var(--surface);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+  text-align: center;
+}
+
+.card h3 {
+  margin: 14px 0 8px;
+  font-family: var(--font-serif);
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.card p {
+  color: var(--ink-soft);
+  font-size: 14.5px;
+  line-height: 1.64;
+}
+
+.card-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 10px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ==========================================================================
+   Demo block — a single embedded video (Bilibili)
+   ========================================================================== */
+
+.demo {
+  margin-top: 34px;
+}
+
+.video-frame {
+  position: relative;
+  margin: 0 auto;
+  max-width: 920px;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--r-lg);
+  border: 1px solid var(--rule);
+  background: linear-gradient(180deg, #fbfcfe 0%, #f3f7fd 100%);
+  overflow: hidden;
+}
+
+.video-frame iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.video-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  height: 100%;
+  padding: 24px;
+  text-align: center;
+  color: var(--muted);
+  background-image: radial-gradient(
+    circle at 50% 42%,
+    rgba(116, 169, 239, 0.16),
+    transparent 62%
+  );
+}
+
+.video-placeholder .glyph {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  color: var(--accent);
+}
+
+.video-placeholder .glyph svg {
+  width: 18px;
+  height: 18px;
+  margin-left: 2px;
+}
+
+.video-placeholder p {
+  max-width: 44ch;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.video-placeholder code {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  color: var(--accent);
+}
+
+.demo-caption {
+  max-width: 780px;
+  margin: 14px auto 0;
+  text-align: center;
+  font-size: 13.5px;
+  color: var(--muted);
+}
+
+.demo-caption b {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 15px 20px;
+  border-bottom: 1px solid var(--rule);
+  flex-wrap: wrap;
+}
+
+.play {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--grad);
+  color: #fff;
+  transition: transform var(--dur) var(--ease);
+}
+
+.play:hover {
+  transform: scale(1.06);
+}
+
+.play svg {
+  width: 14px;
+  height: 14px;
+}
+
+.timecode {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  flex: none;
+}
+
+.timecode b {
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.scrub {
+  flex: 1 1 180px;
+  min-width: 120px;
+  height: 20px;
+  margin: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.scrub::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    var(--accent) 0%,
+    var(--accent) var(--p, 0%),
+    var(--rule) var(--p, 0%),
+    var(--rule) 100%
+  );
+}
+
+.scrub::-moz-range-track {
+  height: 4px;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    var(--accent) 0%,
+    var(--accent) var(--p, 0%),
+    var(--rule) var(--p, 0%),
+    var(--rule) 100%
+  );
+}
+
+.scrub::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+  margin-top: -4px;
+  border-radius: 50%;
+  background: #fff;
+  border: 1.5px solid var(--accent);
+}
+
+.scrub::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #fff;
+  border: 1.5px solid var(--accent);
+}
+
+.speed {
+  padding: 5px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--rule);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--muted);
+  flex: none;
+  transition: color var(--dur) var(--ease), border-color var(--dur) var(--ease);
+}
+
+.speed:hover {
+  color: var(--accent);
+  border-color: var(--rule-strong);
+}
+
+/* --- replay stage: two tracks on one timeline ---------------------------- */
+
+.stage {
+  position: relative;
+  padding: 30px 24px 34px;
+}
+
+.stage-cols {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 60px minmax(0, 1fr);
+  align-items: start;
+}
+
+.col-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 14px;
+  font-size: 11.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+
+.col-label .pip {
+  width: 6px;
+  height: 6px;
+  border-radius: 2px;
+  background: var(--accent);
+}
+
+.col-label.is-task .pip {
+  background: var(--accent-2);
+}
+
+.spine {
+  position: relative;
+  grid-column: 2;
+  grid-row: 1 / span 2; /* widened at runtime to cover every event row */
+  align-self: stretch;
+  justify-self: center;
+  width: 1px;
+  background: var(--rule);
+}
+
+.playhead {
+  position: absolute;
+  left: -3px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 4px rgba(93, 145, 220, 0.16);
+  transform: translateY(-50%);
+  top: 0;
+  opacity: 0;
+  transition: opacity var(--dur) var(--ease);
+}
+
+.playhead.is-on {
+  opacity: 1;
+}
+
+.ev {
+  position: relative;
+  z-index: 1;
+  border-radius: var(--r-md);
+  padding: 12px 15px;
+  border: 1px solid var(--rule);
+  background: var(--surface);
+  font-size: 14px;
+  line-height: 1.5;
+  opacity: 1;
+  transform: none;
+  transition: opacity var(--dur-slow) var(--ease),
+    transform var(--dur-slow) var(--ease), border-color var(--dur) var(--ease);
+}
+
+.ev.is-pending {
+  opacity: 0.16;
+  transform: translateY(8px);
+}
+
+.ev-conv {
+  grid-column: 1;
+}
+
+.ev-task {
+  grid-column: 3;
+}
+
+.ev .who {
+  display: block;
+  font-size: 11.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--faint);
+  margin-bottom: 4px;
+}
+
+.ev.is-user {
+  background: #f6f9fe;
+}
+
+.ev.is-agent {
+  background: #fbfaff;
+  border-color: rgba(170, 161, 233, 0.28);
+}
+
+.ev.is-agent .who {
+  color: var(--accent-2);
+}
+
+.ev-role-tool {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--accent);
+  margin-bottom: 6px;
+  display: block;
+}
+
+.ev-task .ev-title {
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+.ev-task .ev-note {
+  display: block;
+  margin-top: 5px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* inline timestamp: only used when the middle timeline column collapses */
+.ev-when {
+  display: none;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--faint);
+}
+
+.band {
+  grid-column: 3;
+  border-radius: var(--r-md);
+  background: var(--accent-soft-2);
+  border: 1px dashed rgba(170, 161, 233, 0.5);
+  z-index: 0;
+}
+
+.band-label {
+  position: sticky;
+  top: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  font-size: 12.5px;
+  color: #5f5a9d;
+}
+
+.band-label .live {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent-2);
+  animation: pulse 1.9s var(--ease) infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.35;
+    transform: scale(0.82);
+  }
+}
+
+.ev-time {
+  grid-column: 2;
+  justify-self: center;
+  align-self: center;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--faint);
+  font-variant-numeric: tabular-nums;
+  background: var(--bg);
+  padding: 2px 0;
+  z-index: 1;
+}
+
+/* --- video panel --------------------------------------------------------- */
+
+.video {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(circle at 50% 42%, #1c2436, #0e1320 70%);
+  color: var(--dark-ink);
+}
+
+.video-inner {
+  text-align: center;
+  padding: 24px;
+}
+
+.video-inner .glyph {
+  width: 54px;
+  height: 54px;
+  margin: 0 auto 14px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  transition: transform var(--dur) var(--ease), background var(--dur) var(--ease);
+}
+
+.video-inner:hover .glyph {
+  transform: scale(1.06);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.video-inner .glyph svg {
+  width: 18px;
+  height: 18px;
+  margin-left: 2px;
+}
+
+.video-inner p {
+  color: var(--dark-muted);
+  font-size: 14px;
+  max-width: 42ch;
+  margin: 0 auto;
+}
+
+.caption {
+  padding: 14px 20px;
+  border-top: 1px solid var(--rule);
+  color: var(--muted);
+  font-size: 13.5px;
+}
+
+.caption b {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+/* ==========================================================================
+   Figure / architecture
+   ========================================================================== */
+
+.figure {
+  max-width: 1000px;
+  margin: 0 auto;
+  border-radius: var(--r-lg);
+  border: 1px solid var(--rule);
+  background: #fcfcfd;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.02);
+  padding: 24px;
+  overflow-x: auto;
+}
+
+.figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: calc(var(--r-lg) - 5px);
+}
+
+.architecture-principles {
+  margin-top: clamp(30px, 4vw, 46px);
+}
+
+/* The architecture image is static on purpose. */
+
+/* ==========================================================================
+   Status table (use instead of a results table when there are no numbers)
+   ========================================================================== */
+
+.status-wrap {
+  max-width: 820px;
+  margin: 0 auto;
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  background: #fcfcfd;
+  overflow: hidden;
+}
+
+.status {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14.5px;
+}
+
+.status th {
+  text-align: left;
+  padding: 15px 16px 12px;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  border-bottom: 1px solid var(--rule-strong);
+  background: #fff;
+}
+
+.status td {
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--rule);
+  vertical-align: top;
+  text-align: left;
+  color: var(--ink-soft);
+}
+
+.status tr:last-child td {
+  border-bottom: 0;
+}
+
+.status td:last-child {
+  white-space: nowrap;
+}
+
+.state {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.state::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--faint);
+}
+
+.state.is-done::before {
+  background: #4f9e77;
+}
+
+.state.is-partial::before {
+  background: #d99a34;
+}
+
+.state.is-none::before {
+  background: rgba(107, 113, 120, 0.32);
+}
+
+/* hollow ring — a result that has not been measured yet */
+.state.is-pending {
+  color: var(--muted);
+}
+
+.state.is-pending::before {
+  background: transparent;
+  box-shadow: inset 0 0 0 1.5px rgba(107, 113, 120, 0.45);
+}
+
+/* three-column layout for the evaluation table */
+.status.eval td:nth-child(1) {
+  width: 26%;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.status.eval td:nth-child(2) {
+  width: 56%;
+}
+
+.note {
+  max-width: 820px;
+  margin: 20px auto 0;
+  padding: 14px 20px;
+  border-radius: var(--r-md);
+  background: var(--accent-soft);
+  color: #3f5a86;
+  font-size: 13.5px;
+  line-height: 1.6;
+  text-align: center;
+}
+
+/* ==========================================================================
+   BibTeX
+   ========================================================================== */
+
+/* a light card, not a dark block: keeps the whole page in one register */
+.bib {
+  position: relative;
+  max-width: 780px;
+  margin: 0 auto;
+  border-radius: var(--r-lg);
+  border: 1px solid var(--rule);
+  background: linear-gradient(180deg, #fbfcfe 0%, #f5f8fd 100%);
+  padding: 16px 22px 20px;
+  overflow-x: auto;
+}
+
+.bib-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.bib-tag {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.bib pre {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  line-height: 1.8;
+  color: var(--ink-soft);
+  white-space: pre;
+  text-align: left;
+}
+
+.bib .k {
+  color: var(--accent);
+}
+
+.copy {
+  padding: 5px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--rule);
+  background: #fff;
+  color: var(--muted);
+  font-size: 12px;
+  transition: color var(--dur) var(--ease), border-color var(--dur) var(--ease);
+}
+
+.copy:hover {
+  color: var(--accent);
+  border-color: var(--line-strong);
+}
+
+/* ==========================================================================
+   Closing CTA — identity motif #4: a full-bleed photograph, captioned at
+   the bottom. Replace `../images/cta-background.jpg` to change the mood.
+   ========================================================================== */
+
+.cta {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  margin-top: var(--section-gap);
+  min-height: clamp(520px, 76vh, 820px);
+  overflow: hidden;
+  color: #fff;
+  text-align: center;
+  background-color: #0d1119;
+  /* top layer fades the photo into the page; bottom layer is a dark wash that
+     carries the text — it used to peak at 0.28 only 32% up, and the bright
+     clouds read through the copy */
+  background-image:
+    linear-gradient(
+      180deg,
+      #ffffff 0%,
+      rgba(255, 255, 255, 0.58) 10%,
+      rgba(255, 255, 255, 0) 24%
+    ),
+    linear-gradient(
+      0deg,
+      rgba(10, 14, 26, 0.8) 0%,
+      rgba(10, 14, 26, 0.58) 34%,
+      rgba(10, 14, 26, 0.26) 62%,
+      rgba(10, 14, 26, 0) 80%
+    ),
+    url("../images/cta-background.jpg");
+  background-size: cover, cover, cover;
+  background-position: center, center, center;
+  background-repeat: no-repeat;
+}
+
+.cta-inner {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: clamp(48px, 8vw, 88px) var(--gutter) clamp(36px, 6vw, 64px);
+}
+
+.cta-mark {
+  display: block;
+  margin: 0 auto 22px;
+  width: 120px;
+  height: 120px;
+  object-fit: contain;
+  /* a soft light plate so the mascot reads on any photograph underneath */
+  filter: drop-shadow(0 6px 22px rgba(10, 20, 40, 0.45));
+}
+
+.cta h2 {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  font-size: clamp(34px, 5.6vw, 62px);
+  letter-spacing: -0.025em;
+  line-height: 1.06;
+  text-shadow: 0 2px 14px rgba(10, 20, 40, 0.35);
+}
+
+.cta p {
+  margin: 16px auto 0;
+  max-width: 52ch;
+  color: rgba(255, 255, 255, 0.88);
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: clamp(16px, 1.6vw, 20px);
+  line-height: 1.5;
+}
+
+.cta-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 32px;
+}
+
+.cta-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 26px;
+  border-radius: 999px;
+  font-family: var(--font-sans);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  transition: transform 180ms ease, border-color var(--dur) var(--ease);
+}
+
+.cta-btn:hover {
+  transform: translateY(-2px);
+}
+
+.cta-btn.is-primary {
+  background: #fff;
+  color: #16233c;
+  box-shadow: 0 6px 22px rgba(10, 25, 50, 0.28);
+}
+
+.cta-btn.is-ghost {
+  border: 1.5px solid rgba(255, 255, 255, 0.55);
+  color: #fff;
+}
+
+.cta-btn.is-ghost:hover {
+  border-color: #fff;
+}
+
+.cta p.cta-closing {
+  margin-top: 38px;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: clamp(14px, 1.25vw, 16px);
+  letter-spacing: 0.01em;
+}
+
+/* --- footer — sits on the closing photograph, at the very bottom --------- */
+
+.foot {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  padding: 0 var(--gutter) clamp(18px, 3vw, 30px);
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 13px;
+  text-align: center;
+}
+
+/* separators live on the <span> wrappers, NOT inside the links — otherwise a
+   hovered link underlines its ::before dot too and it reads as a stray mark */
+.foot span + span::before {
+  content: "·";
+  margin: 0 10px;
+  color: rgba(255, 255, 255, 0.32);
+}
+
+.foot a {
+  color: inherit;
+  text-decoration: none;
+  transition: color 160ms ease;
+}
+.foot a:hover {
+  color: #fff;
+  text-decoration: underline;
+}
+
+/* ==========================================================================
+   Scroll reveal — intentionally absent.
+   Every section renders at full opacity; the page scrolls as a plain
+   document. To bring it back, add `.reveal` to elements and re-enable the
+   IntersectionObserver block in page.js (kept there, commented out).
+   ========================================================================== */
+
+/* ==========================================================================
+   Responsive
+   ========================================================================== */
+
+/* Roomier margins once the viewport can no longer give the centered columns
+   their full desktop width — without this, paragraphs run nearly edge to edge
+   and the page reads as one dense slab on tablets and narrowed windows. */
+@media (max-width: 1140px) {
+  :root {
+    --gutter: clamp(40px, 9vw, 96px);
+  }
+}
+
+@media (max-width: 860px) {
+  /* a real height so the cover photo reads as a full-bleed band on tablets and
+     phones, matching the closing .cta block — without this the title-only hero
+     would be too short and the photo a thin strip */
+  .hero-bg {
+    min-height: clamp(420px, 60vh, 620px);
+  }
+
+  .stage-cols {
+    grid-template-columns: minmax(0, 1fr) 44px minmax(0, 1fr);
+  }
+
+  .section-title {
+    gap: 14px;
+  }
+}
+
+@media (max-width: 640px) {
+  body {
+    font-size: 15.5px;
+  }
+
+  /* let the --gutter clamp keep working down to phones (proportional side
+     margins instead of a hard cap, so text never runs edge to edge) */
+  :root {
+    --gutter: clamp(24px, 8vw, 96px);
+  }
+
+  /* compact bar on phones — tightened inner padding, logo still via clamp */
+  .top-bar {
+    padding: 10px 14px;
+  }
+
+  .title-block {
+    padding-bottom: 32px;
+  }
+
+  .authors {
+    font-size: 16.5px;
+  }
+
+  .affiliations {
+    font-size: 14.5px;
+  }
+
+  .pill {
+    font-size: 14px;
+    padding: 9px 15px;
+  }
+
+
+  .section-title::before,
+  .section-title::after {
+    display: none;
+  }
+
+  .section-title {
+    justify-content: center;
+    text-align: center;
+  }
+
+  /* single column: the task track becomes inline cards with timestamps */
+  .stage-cols {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .spine,
+  .playhead,
+  .ev-time,
+  .band {
+    display: none;
+  }
+
+  .ev-conv,
+  .ev-task {
+    grid-column: 1;
+  }
+
+  .ev {
+    margin-bottom: 10px;
+  }
+
+  .ev-task {
+    border-left: 2px solid rgba(170, 161, 233, 0.55);
+  }
+
+  .ev-when {
+    display: inline;
+  }
+
+  .stage {
+    padding: 22px 16px 26px;
+  }
+
+  .controls {
+    padding: 14px 16px;
+    gap: 10px;
+  }
+
+  .figure {
+    padding: 16px;
+  }
+
+  .status td:last-child {
+    white-space: normal;
+  }
+
+  /* justified text gets ragged on narrow screens */
+  .abstract {
+    text-align: left;
+  }
+}
+
+/* ==========================================================================
+   Reduced motion — every animation above is decorative, none is required
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+
+}
+
+@media print {
+  .controls,
+  .lang-toggle {
+    display: none;
+  }
+
+  .top-bar {
+    position: static;
+  }
+
+  .ev.is-pending {
+    opacity: 1;
+    transform: none;
+  }
+}
